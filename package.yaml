@@ -22,20 +22,13 @@ description: Please see the README on GitHub at <https://github.com/githubuser/v
 dependencies:
 - base >= 4.7 && < 5
 - z3
-- directory
 - containers
 - composition
 - mtl
 - transformers
 - language-ecmascript
-- pretty
 - parsec
-- unordered-containers
-- syb
-- hashable
-- ansi-wl-pprint
 - cmdargs
-- rainbow
 
 default-extensions:
 - ConstraintKinds
@@ -95,3 +88,4 @@ tests:
     - hrubric
     - ansi-terminal
     - emit-grade
+    - directory

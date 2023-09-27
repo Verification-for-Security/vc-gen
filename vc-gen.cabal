@@ -49,21 +49,14 @@ library
       TypeFamilies
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      ansi-wl-pprint
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , cmdargs
     , composition
     , containers
-    , directory
-    , hashable
     , language-ecmascript
     , mtl
     , parsec
-    , pretty
-    , rainbow
-    , syb
     , transformers
-    , unordered-containers
     , z3
   default-language: Haskell2010
 
@@ -88,21 +81,14 @@ executable vc-gen-exe
       TypeFamilies
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ansi-wl-pprint
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , cmdargs
     , composition
     , containers
-    , directory
-    , hashable
     , language-ecmascript
     , mtl
     , parsec
-    , pretty
-    , rainbow
-    , syb
     , transformers
-    , unordered-containers
     , vc-gen
     , z3
   default-language: Haskell2010
@@ -135,25 +121,19 @@ test-suite vc-gen-test
   build-depends:
       HUnit
     , ansi-terminal
-    , ansi-wl-pprint
     , base >=4.7 && <5
     , cmdargs
     , composition
     , containers
     , directory
     , emit-grade
-    , hashable
     , hrubric
     , hspec
     , hspec-core
     , language-ecmascript
     , mtl
     , parsec
-    , pretty
-    , rainbow
-    , syb
     , transformers
-    , unordered-containers
     , vc-gen
     , z3
   default-language: Haskell2010
