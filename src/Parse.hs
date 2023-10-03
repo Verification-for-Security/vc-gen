@@ -70,6 +70,8 @@ function _ = empty
 -- - While statement (check `scopeInv`)
 -- - Specialise function with the names "assume", "assert", "invariant", 
 --   "requires" and "ensures". To perform appropriate actions.
+--
+-- Again, use the patterns below!
 statement :: MonadNano String m => JS.Statement a -> m (Statement String)
 statement = undefined
 
@@ -93,6 +95,9 @@ addRequire l = modify (mempty { require = l } <>)
 addEnsure :: MonadNano a m => Logic a -> m ()
 addEnsure l = modify (mempty { ensure = l } <>)
 
+addModifies :: MonadNano a m => a -> m ()
+addModifies x = modify (mempty { modifies = [x] } <>)
+
 -- | Converts JS into Nano logic.
 --
 -- This should convert the following subset of JS into Nano expressions:
@@ -101,8 +106,9 @@ addEnsure l = modify (mempty { ensure = l } <>)
 -- - Negation
 -- - Functions called "forall" or "exists" with two arguments (of which the
 --   first a variable) into its respective quantifier. 
---   Hint: check 'CallExpr'
 -- - Remaining expressions should become predicates (if possible)
+--
+-- Again, use the patterns below!
 logic :: MonadNano String m => JS.Expression a -> m (Logic String)
 logic = undefined
 
@@ -113,6 +119,8 @@ logic = undefined
 --
 -- Notice how we return Logic here, this is because we express some of the
 -- operations via a negation of a predicate.
+--
+-- Again, use the patterns below!
 predicate :: MonadNano String m => JS.Expression a -> m (Logic String)
 predicate = undefined
 
@@ -126,12 +134,20 @@ predicate = undefined
 -- - Unary minus
 --
 -- You can look up the types of a JS.Expression in their docs.
--- For an example of a variable pattern match, check out the 'Variable'
--- pattern below. You are free to add more patterns like this, or just straight
--- up pattern match against the code like you would normally.
+-- Below, you will find a bunch of patterns which you can use to implement
+-- the parser. You can essentially implement the functions above with just
+-- these patterns, with the exception of having to match on the JS operators.
 --
--- Note that all these expressions contain location information, you may just
--- discard this with a '_' in your pattern match.
+-- If you're curious about what these patterns are exactly, you can look up the
+-- PatternSynonyms Haskell pragma.
+--
+-- You can use these patterns as follows:
+-- expr (Variable var) = ...
+--
+-- Here, 'var' will be of type String, as dictated by the pattern.
+--
+-- Note that you will have to us every pattern at least once (and some multiple
+-- times), unless stated otherwise.
 --
 -- If you miss a case that you should parse, check out what the JavaScript 
 -- parser will produce by running it separately. This way, you could find
@@ -139,9 +155,66 @@ predicate = undefined
 expr :: MonadNano String m => JS.Expression a -> m (Expr String)
 expr = undefined
 
--- | You can use this to pattern match on a variable.
--- For more info on this, search for the PatternSynonyms language pragma.
---
--- Feel free to add more patterns if you wish!
 pattern Variable :: String -> JS.Expression a
 pattern Variable x <- JS.VarRef _ (JS.Id _ x)
+
+pattern Int :: Int -> JS.Expression a
+pattern Int i <- JS.IntLit _ i
+
+pattern Bool :: Bool -> JS.Expression a
+pattern Bool b <- JS.BoolLit _ b
+
+pattern Minus :: JS.Expression a -> JS.Expression a
+pattern Minus e <- JS.PrefixExpr _ JS.PrefixMinus e
+
+pattern Negate :: JS.Expression a -> JS.Expression a
+pattern Negate e <- JS.PrefixExpr _ JS.PrefixLNot e
+
+pattern ArrayIndex :: String -> JS.Expression a -> JS.Expression a
+pattern ArrayIndex array index <- JS.BracketRef _ (Variable array) index
+
+pattern InfixExpr :: JS.Expression a -> JS.InfixOp -> JS.Expression a -> JS.Expression a
+pattern InfixExpr lhs op rhs <- JS.InfixExpr _ op lhs rhs
+
+pattern Call :: String -> [JS.Expression a] -> JS.Expression a
+pattern Call name arguments <- JS.CallExpr _ (Variable name) arguments
+
+pattern CallStmt :: String -> [JS.Expression a] -> JS.Statement a
+pattern CallStmt name arguments <- JS.ExprStmt _ (Call name arguments)
+
+pattern WhileStmt :: JS.Expression a -> JS.Statement a -> JS.Statement a
+pattern WhileStmt conditional body <- JS.WhileStmt _ conditional body
+
+pattern IfStmt :: JS.Expression a -> JS.Statement a -> JS.Statement a -> JS.Statement a
+pattern IfStmt conditional body0 body1 <- JS.IfStmt _ conditional body0 body1
+
+pattern IfSingleStmt :: JS.Expression a -> JS.Statement a -> JS.Statement a
+pattern IfSingleStmt conditional body <- JS.IfSingleStmt _ conditional body
+
+pattern BlockStmt :: [JS.Statement a] -> JS.Statement a
+pattern BlockStmt body <- JS.BlockStmt _ body
+
+pattern EmptyStmt :: JS.Statement a
+pattern EmptyStmt <- JS.EmptyStmt _
+
+pattern ReturnStmt :: JS.Expression a -> JS.Statement a
+pattern ReturnStmt expr <- JS.ReturnStmt _ (Just expr)
+
+-- | This is a helper for the other assign statements, you do not have to use
+-- this directly.
+pattern AssignStmt' :: JS.LValue a -> JS.Expression a -> JS.Statement a
+pattern AssignStmt' lhs rhs <- JS.ExprStmt _ (JS.AssignExpr _ JS.OpAssign lhs rhs)
+
+-- | You still have to distinguish between an expression or function call on
+-- the rhs when using this pattern.
+pattern AssignStmt :: String -> JS.Expression a -> JS.Statement a
+pattern AssignStmt var rhs <- AssignStmt' (JS.LVar _ var) rhs
+
+pattern ArrAsnStmt :: String -> JS.Expression a -> JS.Expression a -> JS.Statement a
+pattern ArrAsnStmt array index rhs <- AssignStmt' (JS.LBracket _ (Variable array) index) rhs
+
+pattern DeclStmt :: [JS.VarDecl a] -> JS.Statement a
+pattern DeclStmt statements <- JS.VarDeclStmt _ statements
+
+pattern Decl :: String -> JS.Expression a -> JS.VarDecl a
+pattern Decl var expr <- JS.VarDecl _ (JS.Id _ var) (Just expr)
