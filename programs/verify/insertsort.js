@@ -10,7 +10,6 @@ function sort(a, len) {
 
     var index=1;
     while (index<len){
-        // (1) Everything up to (not including) index is sorted.
         var key = a[index];
         var j = index;
         while(j>0 && a[j-1] > key){

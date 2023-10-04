@@ -10,5 +10,3 @@ function sum(n) {
     assert (n == r);
     assert (r >= 1);
 }
-
-/* if I insert sum(0), what's going on? */

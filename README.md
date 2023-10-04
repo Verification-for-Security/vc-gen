@@ -5,6 +5,27 @@ precondition/VCGen methodology as discussed in class. We will work with programs
 that are written in a JavaScript like syntax (EcmaScript) and translate them
 into our imperative language Nano.
 
+## Docker
+
+As an alternative to building the assignment normally, you may also run the
+it in a docker container. Make sure you install docker before executing the
+following steps. The following commands need to be executed while in the root
+of this repository.
+
+First, you'll have to build the image. This is a slow process and may take 10
+minutes or so:
+
+```sh
+$ docker build -t vc-gen .
+```
+
+Second, run the docker image. This will open up a shell, in which you can
+compile, run and test the assignment via the normal commands.
+
+```sh
+$ docker run --rm -v .:/app -ti vc-gen
+```
+
 ## Install Z3
 
 This assignment will use Z3 to solve logical formulas. In order to use Z3

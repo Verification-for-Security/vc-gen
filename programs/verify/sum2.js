@@ -4,11 +4,10 @@ function sum(n) {
     while (n >= i) {
         var j = 1;
         while (i >= j) {
-            sum = sum + j;  
+            sum = sum + j;
             j = j + 1;
             i = i + 1;
         }
-        /* assert A; */
         assert (sum >= 0);
     }
 }
