@@ -11,8 +11,8 @@ function g(x) {
 }
 
  function main(x){
-    //x = f();
-    y = g();
+    x = f(x);
+    y = g(x);
     // this should always fail;
     assert(1<0);
 }

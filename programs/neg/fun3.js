@@ -5,7 +5,7 @@ function f(x) {
     return x;
 }
 
- function c(x){
+function c(x){
     ensures($result>=2);
     y = f(x);
     return y;
