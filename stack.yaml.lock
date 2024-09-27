@@ -40,15 +40,15 @@ packages:
   original:
     hackage: hspec-discover-2.10.6@sha256:df63254c5aa8c5c2b9233b0067728394936b6c9af7e3a5d3d44df78d888dcefd,2167
 - completed:
-    commit: d5d68d5980f53c4c30e1d68877ecffdb5daeaa93
+    commit: aa491476e220e5372f06133516d2626b39ad9a79
     git: https://github.com/Verification-for-Security/hrubric.git
     name: hrubric
     pantry-tree:
-      sha256: b991e2c06323b6154fe56b8c6ddd7a67b2c82a6b8e85c9a6e7f41f73eb1931e5
-      size: 516
+      sha256: 00e86456522f124714cb9aa18554ad4c740d9a747b20f47de9af48f9e2d26278
+      size: 517
     version: 0.1.0.0
   original:
-    commit: d5d68d5980f53c4c30e1d68877ecffdb5daeaa93
+    commit: aa491476e220e5372f06133516d2626b39ad9a79
     git: https://github.com/Verification-for-Security/hrubric.git
 - completed:
     commit: 0b8fb106b0f6328e44efd6c6ad212d9b73bb65a4

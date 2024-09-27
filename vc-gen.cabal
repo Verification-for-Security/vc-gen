@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -43,7 +43,9 @@ library
       FlexibleInstances
       GeneralizedNewtypeDeriving
       LambdaCase
+      NamedFieldPuns
       PatternSynonyms
+      ScopedTypeVariables
       StandaloneDeriving
       StrictData
       TypeFamilies
@@ -75,7 +77,9 @@ executable vc-gen-exe
       FlexibleInstances
       GeneralizedNewtypeDeriving
       LambdaCase
+      NamedFieldPuns
       PatternSynonyms
+      ScopedTypeVariables
       StandaloneDeriving
       StrictData
       TypeFamilies
@@ -97,7 +101,7 @@ test-suite vc-gen-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      LogicSpec
+      ExprSpec
       NanoSpec
       ParseSpec
       Util
@@ -113,7 +117,9 @@ test-suite vc-gen-test
       FlexibleInstances
       GeneralizedNewtypeDeriving
       LambdaCase
+      NamedFieldPuns
       PatternSynonyms
+      ScopedTypeVariables
       StandaloneDeriving
       StrictData
       TypeFamilies

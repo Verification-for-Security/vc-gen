@@ -21,10 +21,10 @@ import Logic
 import Nano
 
 data Constraints a = Constraints
-  { invariant :: Logic a
-  , require :: Logic a
-  , ensure :: Logic a
-  , modifies :: [a]
+  { invariant :: !(Logic a)
+  , require :: !(Logic a)
+  , ensure :: !(Logic a)
+  , modifies :: ![a]
   }
   deriving (Show, Eq, Ord)
 
@@ -63,20 +63,37 @@ function _ = empty
 -- This should convert the following subset of JS into Nano statements:
 -- - Empty statement
 -- - Return
--- - Assignment (both 'x := expr' and 'arr[i] := expr')
+-- - Assignments, Nano has three types of assignments:
+--   - x := f(e0, .., eN)
+--   - x := expr
+--   - arr[i] := expr
 -- - Variable declaration (only when it assigns a value)
 -- - Block statement
 -- - If statement (with and without else)
 -- - While statement (check `scopeInv`)
--- - Specialise function with the names "assume", "assert", "invariant", 
---   "requires" and "ensures". To perform appropriate actions.
+-- 
+-- - Specialise functions with the names "assume" and "assert" to their
+--   respective Nano statement.
 --
--- Again, use the patterns below!
+-- - The calls "requires", "ensures" and "modifies" strengthen the contract of
+--   the function these statements occur in. We track adjustments to the
+--   function contract via the calls `addRequire`, `addEnsure` and `addModifies`
+--   respectively. The statement itself does not do anything else, thus a skip
+--   suffices as a return.
+--
+-- - In a similar fashion, the call "invariant" tracks predicates for the while
+--   statement it occurs in. A call to `addInvariant` adds invariants that
+--   can later be retrieved by the call to `scopeInv`.
+-- - `empty` for remaining patterns.
 statement :: MonadNano String m => JS.Statement a -> m (Statement String)
-statement = undefined
+statement _ = empty
 
 -- | Helper function to scope invariant fetching to a block.
-scopeInv :: MonadNano String m => m a -> m (a, Logic String)
+--
+-- You may pass in an operation that parses a statement, usually the body of a
+-- while loop. This will collect all the invariants that were added during the
+-- parse using `addInvariant`.
+scopeInv :: MonadNano a m => m (Statement a) -> m (Statement a, Logic a)
 scopeInv m = do
   outer <- state $ \cons -> (invariant cons, cons { invariant = true })
   result <- m
@@ -87,7 +104,7 @@ scopeInv m = do
 addInvariant :: MonadNano a m => Logic a -> m ()
 addInvariant l = modify (mempty { invariant = l } <>)
 
--- | Helper function to add an require to the upper function.
+-- | Helper function to add a require to the upper function.
 addRequire :: MonadNano a m => Logic a -> m ()
 addRequire l = modify (mempty { require = l } <>)
 
@@ -95,6 +112,7 @@ addRequire l = modify (mempty { require = l } <>)
 addEnsure :: MonadNano a m => Logic a -> m ()
 addEnsure l = modify (mempty { ensure = l } <>)
 
+-- | Helper function to add a modifies to the upper function.
 addModifies :: MonadNano a m => a -> m ()
 addModifies x = modify (mempty { modifies = [x] } <>)
 
@@ -106,54 +124,60 @@ addModifies x = modify (mempty { modifies = [x] } <>)
 -- - Negation
 -- - Functions called "forall" or "exists" with two arguments (of which the
 --   first a variable) into its respective quantifier. 
--- - Remaining expressions should become predicates (if possible)
+-- - Remaining expressions should be parsed as predicates
+--
+-- Note; make sure that remaining infix expressions besides conjuncts and
+-- disjuncts get passed down to the predicate function call.
 --
 -- Again, use the patterns below!
-logic :: MonadNano String m => JS.Expression a -> m (Logic String)
-logic = undefined
+logic :: (Monad m, Alternative m) => JS.Expression a -> m (Logic String)
+logic _ = empty
 
 -- | Converts JS into Nano expressions of type Bool
 --
 -- This should convert the following subset of JS into Nano expressions:
--- - All (strict) (in)equalities
+-- - All (strict) (in)equalities (i.e. ==, !=, >=, <=, >, <)
+-- - `empty` for remaining patterns.
 --
--- Notice how we return Logic here, this is because we express some of the
--- operations via a negation of a predicate.
+-- Notice that the return value of this function is not actually of type Pred,
+-- but of type Logic. This is because we express some of the operations via a
+-- negation of a predicate. I.e. `x < y` is equivalent to `~(x >= y)`.
+-- The operands are expressions and should be parsed as such.
 --
--- Again, use the patterns below!
-predicate :: MonadNano String m => JS.Expression a -> m (Logic String)
-predicate = undefined
+-- Remember to use the patterns we defined below!
+predicate :: (Monad m, Alternative m) => JS.Expression a -> m (Logic String)
+predicate _ = empty
 
--- | Converts JS into Nano expressions of type Int
+-- | Converts JS into Nano expressions of type Int.
 --
 -- This should convert the following subset of JS into Nano expressions:
 -- - Integer literals
 -- - Variables
--- - Array indexing (the array itself may be just a variable)
--- - Binary arithmetic
+-- - Array indexing
+-- - Binary arithmetic (only those supported by Nano)
 -- - Unary minus
+-- - `empty` for remaining patterns
 --
--- You can look up the types of a JS.Expression in their docs.
--- Below, you will find a bunch of patterns which you can use to implement
--- the parser. You can essentially implement the functions above with just
--- these patterns, with the exception of having to match on the JS operators.
+-- As nano accepts a subset of the javascript language, the remaining cases may
+-- just be caught by a call to `empty`. Alternatively, when debugging, one can
+-- use a call to `error` which can be used to print the uncaught expression!
 --
--- If you're curious about what these patterns are exactly, you can look up the
--- PatternSynonyms Haskell pragma.
+-- While you can look up the types of a JS Expression in their docs, we
+-- recommend you use the patterns defined at the bottom of this document! You
+-- can essentially implement the functions above with just these patterns, with
+-- the exception of having to match on the binary JS operators (e.g. OpAdd).
 --
 -- You can use these patterns as follows:
 -- expr (Variable var) = ...
 --
 -- Here, 'var' will be of type String, as dictated by the pattern.
 --
--- Note that you will have to us every pattern at least once (and some multiple
--- times), unless stated otherwise.
---
--- If you miss a case that you should parse, check out what the JavaScript 
--- parser will produce by running it separately. This way, you could find
--- the culprit expression.
-expr :: MonadNano String m => JS.Expression a -> m (Expr String)
-expr = undefined
+-- If you're curious about what these patterns are exactly, you can look up the
+-- PatternSynonyms Haskell pragma.
+expr :: (Monad m, Alternative m) => JS.Expression a -> m (Expr String)
+expr = \case
+  Variable name -> return $ Var (name :@ 0)
+  _ -> empty
 
 pattern Variable :: String -> JS.Expression a
 pattern Variable x <- JS.VarRef _ (JS.Id _ x)
@@ -170,8 +194,8 @@ pattern Minus e <- JS.PrefixExpr _ JS.PrefixMinus e
 pattern Negate :: JS.Expression a -> JS.Expression a
 pattern Negate e <- JS.PrefixExpr _ JS.PrefixLNot e
 
-pattern ArrayIndex :: String -> JS.Expression a -> JS.Expression a
-pattern ArrayIndex array index <- JS.BracketRef _ (Variable array) index
+pattern ArrayIndex :: JS.Expression a -> JS.Expression a -> JS.Expression a
+pattern ArrayIndex array index <- JS.BracketRef _ array index
 
 pattern InfixExpr :: JS.Expression a -> JS.InfixOp -> JS.Expression a -> JS.Expression a
 pattern InfixExpr lhs op rhs <- JS.InfixExpr _ op lhs rhs

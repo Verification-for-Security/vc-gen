@@ -6,7 +6,7 @@ import Control.Monad
 import Control.Monad.Trans.Maybe
 import Grade
 
-import qualified LogicSpec
+import qualified ExprSpec
 import qualified ParseSpec
 import qualified NanoSpec
 
@@ -14,7 +14,7 @@ rubric :: Rubric
 rubric = do
   criterion "It compiles" (1/10) . passOrFail $ 
     it "..." $ True @?= True
-  criterion "Logic" (1/10) LogicSpec.rubric
+  criterion "Expr" (1/10) ExprSpec.rubric
   criterion "Parse" (3/10) ParseSpec.rubric
   criterion "Nano" (5/10) NanoSpec.rubric
 

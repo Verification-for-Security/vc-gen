@@ -1,6 +1,6 @@
 function inc(x,j,i) {
-    a[i] = x
-    b[i] = a[i]+1;
-    b[j] = 3; 
-    assert (b[i]==a[i]+1);
+    arr_a[i] = x
+    arr_b[i] = arr_a[i]+1;
+    arr_b[j] = 3; 
+    assert(arr_b[i]==arr_a[i]+1);
 }

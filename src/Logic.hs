@@ -13,8 +13,6 @@ module Logic
 import Expr
 import Prelude hiding (and, or)
 
-import qualified Data.Set as Set
-
 -- | The constraints that we generate from Nano programs.
 data Logic a
   = Pred (Pred a)
@@ -72,12 +70,7 @@ implies lhs rhs = neg $ and [lhs, neg rhs]
 iff :: Logic a -> Logic a -> Logic a
 iff lhs rhs = and [implies lhs rhs, implies rhs lhs]
 
-instance Vars Logic where
-  vars = \case
-    Pred p -> vars p
-    Neg l -> vars l
-    And l -> mconcat $ map vars l
-    Forall x l -> Set.union (vars l) (vars $ Var x)
-
 instance Subable Logic where
-  subst = undefined
+  shift = undefined
+
+  subst' = undefined

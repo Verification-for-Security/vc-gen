@@ -1,5 +1,5 @@
 function inc(x,i) {
-    a[i] = x
-    b[i] = a[i]+1; 
-    assert (b[i]==x+1);
+    arr_a[i] = x
+    arr_b[i] = arr_a[i]+1;
+    assert (arr_b[i]==x+1);
 }

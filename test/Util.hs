@@ -1,11 +1,7 @@
 module Util 
   ( Normalize (..)
-  , getPrograms
   , stripInv
   ) where
-
-import System.IO.Unsafe
-import System.Directory
 
 import Prelude hiding (and, or, seq)
 import Logic
@@ -53,8 +49,3 @@ stripInv' (Seq ss) = seq $ stripInv' <$> ss
 stripInv' (If cond body0 body1) = If cond (stripInv' body0) (stripInv' body1)
 stripInv' (While _ cond body) = While true cond (stripInv' body)
 stripInv' e = e
-
-getPrograms :: FilePath -> [FilePath]
-getPrograms dir = files
-  where
-    files = unsafePerformIO $ listDirectory dir

@@ -5,86 +5,46 @@ precondition/VCGen methodology as discussed in class. We will work with programs
 that are written in a JavaScript like syntax (EcmaScript) and translate them
 into our imperative language Nano.
 
-## Docker
+## Getting Started
 
-As an alternative to building the assignment normally, you may also run the
-it in a docker container. Make sure you install docker before executing the
-following steps. The following commands need to be executed while in the root
-of this repository.
+Make sure you completed the [setup guide](https://github.com/Verification-for-Security/setup-guide).
+Afterwards, set the following toolchain versions through the GHCup TUI.
 
-First, you'll have to build the image. This is a slow process and may take 10
-minutes or so:
+- `GHC 9.4.8`
+- `HLS 2.9.0.1`
 
-```sh
-$ docker build -t vc-gen .
-```
+### Install Z3
 
-Second, run the docker image. This will open up a shell, in which you can
-compile, run and test the assignment via the normal commands.
-
-```sh
-$ docker run --rm -v .:/app -ti vc-gen
-```
-
-## Install Z3
-
-This assignment will use Z3 to solve logical formulas. In order to use Z3
-from code, you will need to install the developer version of Z3 (not just the
-executable). Since we're using [Haskell's Z3 bindings](https://hackage.haskell.org/package/z3),
-we need to use a specific version of Z3, namely `4.8.x`. Any other version will
-give you compilation errors.
-
-### Package Manager (Linux)
-
-Use your package manager to install the z3 developer version. Here's an example
-for Ubuntu.
+This assignment will use Z3 to solve logical formulas. Haskell's Z3 bindings
+require us to use version `4.8.17` of Z3. Other version will likely not be
+compatible. Stack should be able to automatically link against the library
+if we place it in a folder called `z3` at the root of this assignment. To be
+explicit, stack expects both the `z3/include` and `z3/bin` to be present, as it
+will search these when attempting to link against Z3. The following command does
+this install for you. If this doesn't work, you may just manually download the
+correct version.
 
 ```sh
-$ sudo apt install libz3-dev
+# Linux (and WSL)
+wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-x64-glibc-2.31.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3
+
 ```
+```sh
+# MacOS (ARM)
+wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-arm64-osx-10.16.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3
 
-Make sure that you install the correct version!
-
-### Manually
-
-Go to the [Z3 releases](https://github.com/Z3Prover/z3/releases/tag/z3-4.8.17)
-page and pick the release for your OS and architecture.
-
-#### Binary
-
-From this release, copy the `z3` binary into your path.
- - `/usr/local/bin`, for Linux, MacOS.
- - `\Windows\System32\bin`, for Windows.
-
-Make sure you can now run the binary from any other directory. You may need
-to open a new terminal for this to work. If this gives you a version number,
-then proceed!
+```
 
 ```sh
-$ z3 --version
+# MacOS (x64)
+wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-x64-osx-10.16.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3
+
 ```
 
-#### Headers
-
-Move the include files (directory `include`) into a directory for include
-files. For example `/usr/local/include`, for Linux and MacOS. You can pick any
-directory for Windows. Then, modify the `stack.yaml` file in this directory and
-add the path to `extra-include-dirs`. For example:
-
-```yaml
-extra-include-dirs: [/usr/local/include]
-```
-
-#### Library
-
-Copy the library files (all remaining files in the `bin` directory) and copy
-them to your library path. For example `/usr/local/lib` for Linux, MacOS, or any
-directory for Windows. Again, you need to update your `stack.yaml` to add the
-library path:
-
-```yaml
-extra-lib-dirs: [/usr/local/lib]
-```
+Although we still highly recommend using WSL, for those using Windows directly,
+you will have to install (and rename) Z3 manually from the [download page](https://github.com/Z3Prover/z3/releases/tag/z3-4.8.17) such that it matches the
+description above. When running the assignment, you additionally make the z3.dll
+file visible in your path.
 
 ## Running and testing
 
@@ -92,7 +52,11 @@ This code again features a test bench, which you may run in the same fashion
 with `stack`. The tests again aim to direct you through to code base of this
 assignment and we strongly suggest you follow this!
 
-This assignment also features an executable which may be ran with the following
+```
+$ stack test
+```
+
+This assignment also features an executable which you can run with the following
 command.
 
 ```
@@ -155,15 +119,15 @@ Make sure to check out the nano programs to form a better understanding of what
 the embedding looks like.
 
 For your verifier, it is just as important that your code rejects bad programs
-as it is to proof good programs. As such, we feature a bunch of programs to
+as it is to prove good programs. As such, we feature a bunch of programs to
 achieve both goals. Programs in the `programs/pos` directory should pass
 verification, while programs in the `programs/neg` directory should fail
 verification.
 
 ### Verification
 
-You will have to verify all the tests in `programs/verify`. As you are probably
-already aware of at this point, we need to provide invariants to prove properties
+You will have to verify all the tests in `programs/verify`. 
+As you know, we need to provide invariants to prove properties
 when loops are involved.
 
 You may add invariants to the files in this folder in order to verify them.
@@ -186,7 +150,7 @@ invariant(R);
 ## Grading
 
 Your final grade corresponds directly to the one awarded to you by the test
-infrastructure. Do make sure your submission correctly executes on our online
+infrastructure. Make sure your submission is correctly executed in our online
 environment.
 
 If there are issues with the submission system, don't panic! We will handle this
@@ -200,10 +164,9 @@ don't hesitate to send us your submission through different means (e.g. email).
 
 ## Plagiarism
 
-We have a strict zero tolerance policy against plagiarism. Sadly, we find cases
-every year... This is not fun for you, nor us. Please, refrain from copying 
+We have a strict zero-tolerance policy against plagiarism. Please, refrain from copying 
 and/or sharing your code with other groups.
 
 Since this is a group assignment, we expect that most of you will work together
 via Git. Do make sure to make your repository **private**! Sharing your code in
-this manner is sadly still plagiarism, even if unintentional.
+this manner is plagiarism, even if unintentional.

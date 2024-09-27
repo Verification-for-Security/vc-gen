@@ -1,6 +1,6 @@
 function inc(x) {
     var i = 1;
-    a[i] = 3;
-    b[i] = 2;
-    assert (a[i]==3);
+    arr_a[i] = 3;
+    arr_b[i] = 2;
+    assert (arr_a[i]==3);
 }

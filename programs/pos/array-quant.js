@@ -1,5 +1,5 @@
 function test(x, j) {
-    assume(forall(i, a[i]>=0));
-    a[i] = 2;
-    assert(a[j]>=0);
+    assume(forall(i, arr_a[i]>=0));
+    arr_a[i] = 2;
+    assert(arr_a[j]>=0);
 }   

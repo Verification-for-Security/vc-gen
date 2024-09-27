@@ -1,4 +1,4 @@
 function inc(x, i) {
-    a[i] = 1;
-    assert (a[i] >= 0);
+    arr_a[i] = 1;
+    assert (arr_a[i] >= 0);
 }   

@@ -39,7 +39,9 @@ default-extensions:
 - FlexibleInstances
 - GeneralizedNewtypeDeriving
 - LambdaCase
+- NamedFieldPuns
 - PatternSynonyms
+- ScopedTypeVariables
 - StandaloneDeriving
 - StrictData
 - TypeFamilies

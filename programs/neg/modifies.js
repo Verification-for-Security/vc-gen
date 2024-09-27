@@ -1,12 +1,10 @@
 function f() {
-    //modifies(a);
-    a[0] = 1;
-    x = g(a);
-    //havoc(a);
-    assert(a[0]==1);
+    arr_a[0] = 1;
+    x = g(arr_a);
+    assert(arr_a[0]==1);
 }
 
-function g(a) {
-    modifies(a);
+function g(arr_a) {
+    modifies(arr_a);
     return 0;
 }

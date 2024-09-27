@@ -29,7 +29,7 @@ rubric = do
       unwrap (Left  x) = error . show $ x
 
   -- Nano parsers
-  let transform ty = flip evalStateT mempty . ty . unwrap. parse expression ""
+  let transform ty = ty . unwrap . parse expression ""
   let expr = transform Parse.expr
   let predicate = transform Parse.predicate
   let logic = transform Parse.logic
@@ -39,18 +39,22 @@ rubric = do
   let e1 = "x * (y + 15 * 23) * (-3)"
   let e2 = "x[i] - y - z - 5 * 2"
   let e3 = "x + (y[i] * 25) + 4 + z"
+  let e4 = "-(5 + x)"
 
   -- In syntax tree format
-  let e0' = sub (add (Var "x") (mul (Const 4) (Const 23))) (Var "y")
-  let e1' = mul (mul (Var "x") (add (Var "y") (mul (Const 15) (Const 23)))) (sub (Const 0) (Const 3))
-  let e2' = sub (sub (sub (Select (Array "x") (Var "i")) (Var "y")) (Var "z")) (mul (Const 5) (Const 2))
-  let e3' = add (add (add (Var "x") (mul (Select (Array "y") (Var "i")) (Const 25))) (Const 4)) (Var "z")
+  let e0' = sub (add (Var ("x":@0)) (mul (Const 4) (Const 23))) (Var ("y":@0))
+  let e1' = mul (mul (Var ("x":@0)) (add (Var ("y":@0)) (mul (Const 15) (Const 23)))) (sub (Const 0) (Const 3))
+  let e2' = sub (sub (sub (Select (Var ("x":@0)) (Var ("i":@0))) (Var ("y":@0))) (Var ("z":@0))) (mul (Const 5) (Const 2))
+  let e3' = add (add (add (Var ("x":@0)) (mul (Select (Var ("y":@0)) (Var ("i":@0))) (Const 25))) (Const 4)) (Var ("z":@0))
+  let e4' = sub (Const 0) (add (Const 5) (Var ("x":@0)))
 
-  passes "expr" (1/6) $ do
-    expr e0 @?= Just e0'
-    expr e1 @?= Just e1'
-    expr e2 @?= Just e2'
-    expr e3 @?= Just e3'
+  criterion "expr" (1/6) . passOrFail $ do
+    it "recursively parses expressions" $ do
+      expr e0 @?= Just e0'
+      expr e1 @?= Just e1'
+      expr e2 @?= Just e2'
+      expr e3 @?= Just e3'
+      expr e4 @?= Just e4'
 
   -- Boolean Expressions
   let p0 = concat [e0, ">=", e1]
@@ -61,14 +65,15 @@ rubric = do
   -- In syntax tree format
   let p0' = Pred $ e0' :>=: e1'
   let p1' = Neg . Pred $ e3' :==: e2'
-  let p2' = Neg . Pred $ e0' :<=: e3'
+  let p2' = Neg . Pred $ e3' :>=: e0'
   let p3' = Pred $ e2' :==: e1'
  
-  passes "predicate" (1/6) $ do
-    predicate p0 @?= Just p0'
-    predicate p1 @?= Just p1'
-    predicate p2 @?= Just p2'
-    predicate p3 @?= Just p3'
+  criterion "predicate" (1/6) . passOrFail $ do
+    it "handles (strict-)(in)equalities" $ do
+      predicate p0 @?= Just p0'
+      predicate p1 @?= Just p1'
+      predicate p2 @?= Just p2'
+      predicate p3 @?= Just p3'
 
   -- Boolean Expressions
   let b0 = concat [e0, ">=", e1, "&& !true"]
@@ -81,18 +86,21 @@ rubric = do
   -- In syntax tree format
   let b0' = Pred (e0' :>=: e1') <> neg true
   let b1' = or [Neg . Pred $ e3' :==: e2', b0']
-  let b2' = and [false, b1', Pred $ e0' :<=: e3']
+  let b2' = and [false, b1', Pred $ e3' :>=: e0']
   let b3' = or [Pred $ e2' :==: e1', b2', true]
-  let b4' = Forall "x" . Pred $ Var "x" :==: Const 4
-  let b5' = exists "x" . Pred $ Var "y" :>=: Var "x"
+  let b4' = Forall "x" . Pred $ Var ("x" :@ 0) :==: Const 4
+  let b5' = exists "x" . Pred $ Var ("y" :@ 0) :>=: Var ("x" :@ 0)
  
-  passes "logic" (1/6) $ do
-    logic b0 @?= Just b0'
-    logic b1 @?= Just b1'
-    logic b2 @?= Just b2'
-    logic b3 @?= Just b3'
-    logic b4 @?= Just b4'
-    logic b5 @?= Just b5'
+  criterion "logic" (1/6) . passOrFail $ do
+    it "parses propositional logic" $ do
+      logic b0 @?= Just b0'
+      logic b1 @?= Just b1'
+      logic b2 @?= Just b2'
+      logic b3 @?= Just b3'
+
+    it "parses functions forall and exists as quantifiers" $ do
+      logic b4 @?= Just b4'
+      logic b5 @?= Just b5'
 
   criterion "statement" (3/6) . distribute $ do
     let nano file = (normalize <$>) <$> Parse.nano file
@@ -109,10 +117,10 @@ rubric = do
         , fmods = []
         , fbody = Seq
           [ Assign "res" (Const 0)
-          , If (Pred $ Var "x" :>=: Const 1)
-               (Assign "res" (Var "x"))
-               (Assign "res" (sub (Const 0) (Var "x")))
-          , Assert . Pred $ Var "res" :>=: Const 0
+          , If (Pred $ Var ("x" :@ 0) :>=: Const 1)
+               (Assign "res" (Var ("x" :@ 0)))
+               (Assign "res" (sub (Const 0) (Var ("x" :@ 0))))
+          , Assert . Pred $ Var ("res" :@ 0) :>=: Const 0
           ]
         }
       ]
@@ -126,10 +134,10 @@ rubric = do
         , fmods = []
         , fbody = Seq
           [ Assign "x" $ Const 0
-          , While (Pred $ Var "x" :<=: Const 6)
-                  (Pred $ Var "x" :<=: Const 5)
-                  (Assign "x" (add (Var "x") (Const 1)))
-          , Assert . Pred $ Var "x" :==: Const 6
+          , While (Pred $ Const 6 :>=: Var ("x" :@ 0))
+                  (Pred $ Const 5 :>=: Var ("x" :@ 0))
+                  (Assign "x" (add (Var ("x" :@ 0)) (Const 1)))
+          , Assert . Pred $ Var ("x" :@ 0) :==: Const 6
           ]
         }
       ]
@@ -143,16 +151,16 @@ rubric = do
         , fmods = []
         , fbody = Seq
           [ Assign "lock" (Const 0)
-          , If (Pred $ Var "x" :>=: Const 1)
+          , If (Pred $ Var ("x" :@ 0) :>=: Const 1)
                (Seq 
                  [ Assign "lock" (Const 1)
-                 , Assert $ And [Pred $ Var "lock" :>=: Const 1, Pred $ Var "x" :>=: Const 1]
+                 , Assert $ And [Pred $ Var ("lock" :@ 0) :>=: Const 1, Pred $ Var ("x" :@ 0) :>=: Const 1]
                  ])
                skip
-          , If (Pred $ Var "y" :>=: Const 1)
+          , If (Pred $ Var ("y" :@ 0) :>=: Const 1)
                (Seq
                  [ Assign "lock" (Const 0)
-                 , Assert $ And [Pred $ Var "lock" :<=: Const 0, Pred $ Var "y" :>=: Const 1]
+                 , Assert $ And [Pred $ Const 0 :>=: Var ("lock" :@ 0), Pred $ Var ("y" :@ 0) :>=: Const 1]
                  ])
                skip
           ]
@@ -169,18 +177,18 @@ rubric = do
         , fbody = Seq
           [ Assign "i" (Const 1)
           , Assign "sum" (Const 0)
-          , While (Pred $ Var "i" :>=: Const 0)
-                  (Pred $ Var "n" :>=: Var "i")
+          , While (Pred $ Var ("i" :@ 0) :>=: Const 0)
+                  (Pred $ Var ("n" :@ 0) :>=: Var ("i" :@ 0))
                   (Seq
                     [ Assign "j" (Const 1)
-                    , While (Neg . Pred $ Var "i" :>=: Const 0)
-                            (Pred $ Var "i" :>=: Var "j")
+                    , While (Neg . Pred $ Var ("i" :@ 0) :>=: Const 0)
+                            (Pred $ Var ("i" :@ 0) :>=: Var ("j" :@ 0))
                             (Seq
-                              [ Assign "sum" (add (Var "sum") (Var "j"))
-                              , Assign "j" (add (Var "j") (Const 1))
-                              , Assign "i" (add (Var "i") (Const 1))
+                              [ Assign "sum" (add (Var ("sum" :@ 0)) (Var ("j" :@ 0)))
+                              , Assign "j" (add (Var ("j" :@ 0)) (Const 1))
+                              , Assign "i" (add (Var ("i" :@ 0)) (Const 1))
                               ])
-                    , Assert . Pred $ Var "sum" :>=: Const 0
+                    , Assert . Pred $ Var ("sum" :@ 0) :>=: Const 0
                     ])
           ]
         }
@@ -195,10 +203,10 @@ rubric = do
         , fmods = []
         , fbody = Seq
           [ Assign "res" (Const 0)
-          , If (Pred $ Var "x" :>=: Const 1)
-               (Assign "res" (Var "x"))
-               (Assign "res" (sub (Const 0) (Var "x")))
-          , Assert . Pred $ Var "res" :>=: Const 1
+          , If (Pred $ Var ("x" :@ 0) :>=: Const 1)
+               (Assign "res" (Var ("x" :@ 0)))
+               (Assign "res" (sub (Const 0) (Var ("x" :@ 0))))
+          , Assert . Pred $ Var ("res" :@ 0) :>=: Const 1
           ]
         }
       ]
@@ -212,10 +220,10 @@ rubric = do
         , fmods = []
         , fbody = Seq
           [ Assign "x" (Const 0)
-          , While (Pred $ Var "x" :<=: Const 6)
-                  (Pred $ Var "x" :<=: Const 5)
-                  (Assign "x" (add (Var "x") (Const 1)))
-          , Assert . Pred $ Var "x" :==: Const 5
+          , While (Pred $ Const 6 :>=: Var ("x" :@ 0))
+                  (Pred $ Const 5 :>=: Var ("x" :@ 0))
+                  (Assign "x" (add (Var ("x" :@ 0)) (Const 1)))
+          , Assert . Pred $ Var ("x" :@ 0) :==: Const 5
           ]
         }
       ]
@@ -229,9 +237,9 @@ rubric = do
         , fmods = []
         , fbody = Seq
           [ Assign "x" (Const 0)
-          , While (Pred $ Var "x" :<=: Const 5)
-                  (Pred $ Var "x" :<=: Const 5)
-                  (Assign "x" (add (Var "x") (Const 1)))
+          , While (Pred $ Const 5 :>=: Var ("x" :@ 0))
+                  (Pred $ Const 5 :>=: Var ("x" :@ 0))
+                  (Assign "x" (add (Var ("x" :@ 0)) (Const 1)))
           ]
         }
       ]
@@ -240,23 +248,23 @@ rubric = do
       [ Function
         { fname = "f"
         , fargs = ["x"]
-        , fpre = Pred $ Var "x" :>=: Const 0
-        , fpost = Pred $ Var "$result" :>=: Const 2
+        , fpre = Pred $ Var ("x" :@ 0) :>=: Const 0
+        , fpost = Pred $ Var ("$result" :@ 0) :>=: Const 2
         , fmods = []
         , fbody = Seq
-          [ Assign "x" $ BinOp Add (Var "x") (Const 2)
-          , Return $ Var "x"
+          [ Assign "x" $ BinOp Add (Var ("x" :@ 0)) (Const 2)
+          , Return $ Var ("x" :@ 0)
           ]
         }
       , Function
         { fname = "c"
         , fargs = ["x"]
         , fpre = true
-        , fpost = Pred $ Var "$result" :>=: Const 2
+        , fpost = Pred $ Var ("$result" :@ 0) :>=: Const 2
         , fmods = []
         , fbody = Seq
-          [ AppAsn "y" "f" [Var "x"]
-          , Return $ Var "y"
+          [ AppAsn "y" "f" [Var ("x" :@ 0)]
+          , Return $ Var ("y" :@ 0)
           ]
         }
       ]
@@ -269,19 +277,19 @@ rubric = do
         , fpost = true
         , fmods = []
         , fbody = Seq
-          [ ArrAsn "a" (Const 0) (Const 1)
-          , AppAsn "x" "g" [Var "a"]
-          , Assert . Pred $ Select (Array "a") (Const 1) :==: Const 2
+          [ ArrAsn "arr_a" (Const 0) (Const 1)
+          , AppAsn "x" "g" [Var ("arr_a" :@ 0)]
+          , Assert . Pred $ Select (Var ("arr_a" :@ 0)) (Const 1) :==: Const 2
           ]
         }
       , Function
         { fname = "g"
-        , fargs = ["a"]
+        , fargs = ["arr_a"]
         , fpre = true
-        , fpost = Pred $ Select (Array "a") (Const 1) :==: Const 2
-        , fmods = ["a"]
+        , fpost = Pred $ Select (Var ("arr_a" :@ 0)) (Const 1) :==: Const 2
+        , fmods = ["arr_a"]
         , fbody = Seq
-          [ ArrAsn "a" (Const 1) (Const 2)
+          [ ArrAsn "arr_a" (Const 1) (Const 2)
           , Return $ Const 0
           ]
         }
@@ -295,17 +303,17 @@ rubric = do
         , fpost = true
         , fmods = []
         , fbody = Seq
-          [ ArrAsn "a" (Const 0) (Const 1)
-          , AppAsn "x" "g" [Var "a"]
-          , Assert . Pred $ Select (Array "a") (Const 0) :==: Const 1
+          [ ArrAsn "arr_a" (Const 0) (Const 1)
+          , AppAsn "x" "g" [Var ("arr_a" :@ 0)]
+          , Assert . Pred $ Select (Var ("arr_a" :@ 0)) (Const 0) :==: Const 1
           ]
         }
       , Function
         { fname = "g"
-        , fargs = ["a"]
+        , fargs = ["arr_a"]
         , fpre = true
         , fpost = true
-        , fmods = ["a"]
+        , fmods = ["arr_a"]
         , fbody = Return $ Const 0
         }
       ]
@@ -315,10 +323,10 @@ rubric = do
         { fname = "f"
         , fargs = ["x", "y"]
         , fpre = true
-        , fpost = Neg . Pred $ Var "$result" :>=: Const 0
+        , fpost = Neg . Pred $ Var ("$result" :@ 0) :>=: Const 0
         , fmods = []
         , fbody = Seq
-          [ If (Neg . Pred $ Var "y" :<=: Const 0)
+          [ If (Neg . Pred $ Const 0 :>=: Var ("y" :@ 0))
                (Return $ sub (Const 0) (Const 7))
                (Seq [])
           , Return $ sub (Const 0) (Const 1)
