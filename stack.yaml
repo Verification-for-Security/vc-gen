@@ -17,15 +17,13 @@ extra-deps:
 
 extra-include-dirs:
 - z3/include
-- ../z3/include
 - /usr/local/include
 
 extra-lib-dirs:
 - z3/bin
-- ../z3/bin
 - /usr/local/lib
 
 ghc-options:
   # Make sure that the executables can actually find the z3 binary for dirs that
   # are not in PATH.
-  vc-gen: -optl-Wl,-rpath,z3/bin -optl-Wl,-rpath,../z3/bin
+  vc-gen: -optl-Wl,-rpath,z3/bin

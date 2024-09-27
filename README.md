@@ -27,18 +27,15 @@ correct version.
 ```sh
 # Linux (and WSL)
 wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-x64-glibc-2.31.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3
-
 ```
 ```sh
 # MacOS (ARM)
-wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-arm64-osx-10.16.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3
-
+wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-arm64-osx-10.16.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3 && ln -s z3/bin/libz3.dylib libz3.dylib
 ```
 
 ```sh
 # MacOS (x64)
-wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-x64-osx-10.16.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3
-
+wget -O z3.zip https://github.com/Z3Prover/z3/releases/download/z3-4.8.17/z3-4.8.17-x64-osx-10.16.zip && unzip z3 && rm z3.zip && mv z3-4.8.17-* z3 && ln -s z3/bin/libz3.dylib libz3.dylib
 ```
 
 Although we still highly recommend using WSL, for those using Windows directly,
