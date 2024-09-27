@@ -21,8 +21,7 @@ compatible. Stack should be able to automatically link against the library
 if we place it in a folder called `z3` at the root of this assignment. To be
 explicit, stack expects both the `z3/include` and `z3/bin` to be present, as it
 will search these when attempting to link against Z3. The following command does
-this install for you. If this doesn't work, you may just manually download the
-correct version.
+this install for you.
 
 ```sh
 # Linux (and WSL)
