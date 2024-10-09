@@ -12,7 +12,7 @@ function find(arr_a, key, len) {
             if (key < arr_a[mid]) {high = mid;} else {pos = mid;}
         }
     }
-    assert(pos < 0 ||  arr_[pos]==key);
+    assert(pos < 0 ||  arr_a[pos]==key);
     assert(pos >= 0 || low==high);
-    assert(pos >= 0 || forall(k, k<0 || k>=len || arr_[k] != key));
+    assert(pos >= 0 || forall(k, k<0 || k>=len || arr_a[k] != key));
 }
