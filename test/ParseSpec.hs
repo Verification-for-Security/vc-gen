@@ -333,3 +333,16 @@ rubric = do
           ]
         }
       ]
+      
+    check "programs/pos/inc0.js" 
+      [ Function 
+        { fname = "inc"
+        , fargs = ["x"]
+        , fbody = Seq [Assume (Pred (Var ("x" :@ 0) :>=: Const 1))
+        , Assign "y" (BinOp Add (Var ("x" :@ 0)) (Const 1))
+        , Assert (Pred (Var ("y" :@ 0) :>=: Const 1))]
+        , fpre = And []
+        , fpost = And []
+        , fmods = []
+        }
+      ]
