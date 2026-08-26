@@ -152,7 +152,7 @@ to the AI agent, making sure that the solution is correct.
 Place the program into ``programs/guardrails`` and add a ``README.md``
 describing what the program does. You may write a sorting algorithm or any other
 program that can be expressed in our language. This will count for 1/10 points.
-We will award two bonus point to the most creative solution.
+We will award two bonus point to the team with the most creative solution.
 
 ## Grading
 
