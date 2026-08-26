@@ -142,6 +142,11 @@ invariant(P);
 invariant(Q);
 invariant(R);
 ```
+## GenAI Guardrails
+
+For this part of the assignment, you may use coding agents like Claude Code or Codex.
+Use your agent to build a larger, more realistic program. Specify the correctness of the program via assertions, 
+and ask your agent to fill in the invariants to make the proof pass.
 
 ## Grading
 
