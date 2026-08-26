@@ -144,13 +144,17 @@ invariant(R);
 ```
 ## GenAI Guardrails
 
-For this part of the assignment, you may use coding agents like Claude Code or
-Codex. Use your agent to build a larger, more realistic program. Specify the
-correctness of the program via assertions, and ask your agent to fill in the
-invariants to make the proof pass. This will let our prover serve as a guardrail
-to the AI agent, making sure that the solution is correct.
-Place the program into ``programs/guardrails`` and add a ``README.md``
-describing what the program does. You may write a sorting algorithm or any other
+For this part of the assignment, you may use coding agents like [Claude
+Code](https://claude.ai/), [Codex](https://openai.com/codex/), or
+[Gemeni](https://antigravity.google/docs/cli/using/). You can access Gemeni with
+your VU account or apply for a free account
+[here](https://gemini.google/nl/students/?hl=nl). Use your agent to build a
+larger, more realistic program. Specify the correctness of the program via
+assertions, and ask your agent to fill in the invariants to make the proof pass.
+This will let our prover serve as a guardrail to the AI agent, making sure that
+the solution is correct. You cannot change the verification framework. Place the
+program into ``programs/guardrails`` and add a ``README.md`` describing what the
+program does. You may write a more sophisticated sorting algorithm or any other
 program that can be expressed in our language. This will count for 1/10 points.
 We will award two bonus point to the team with the most creative solution.
 
