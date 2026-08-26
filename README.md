@@ -146,7 +146,7 @@ invariant(R);
 
 For this part of the assignment, you may use coding agents like [Claude
 Code](https://claude.ai/), [Codex](https://openai.com/codex/), or
-[Gemeni](https://antigravity.google/docs/cli/using/). You can access Gemeni with
+[Gemini](https://antigravity.google/docs/cli/using/). You can access Gemini with
 your VU account or apply for a free account
 [here](https://gemini.google/nl/students/?hl=nl). Use your agent to build a
 larger, more realistic program. Specify the correctness of the program via
