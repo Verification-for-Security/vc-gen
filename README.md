@@ -144,15 +144,21 @@ invariant(R);
 ```
 ## GenAI Guardrails
 
-For this part of the assignment, you may use coding agents like Claude Code or Codex.
-Use your agent to build a larger, more realistic program. Specify the correctness of the program via assertions, 
-and ask your agent to fill in the invariants to make the proof pass.
+For this part of the assignment, you may use coding agents like Claude Code or
+Codex. Use your agent to build a larger, more realistic program. Specify the
+correctness of the program via assertions, and ask your agent to fill in the
+invariants to make the proof pass. Place the program into
+``programs/guardrails`` and add a ``README.md`` describing what the program
+does. You may write a sorting algorithm or any other program that can be
+expressed in our language. This will count for 1/10 points.
 
 ## Grading
 
-Your final grade corresponds directly to the one awarded to you by the test
-infrastructure. Make sure your submission is correctly executed in our online
-environment.
+Your final grade for the first part of the assignment corresponds directly to
+the one awarded to you by the test infrastructure. Make sure your submission is
+correctly executed in our online environment. This accounts for 9/10 points.
+
+We will grade the GenAI guardrails example manually.
 
 If there are issues with the submission system, don't panic! We will handle this
 on a case-by-case basis.
